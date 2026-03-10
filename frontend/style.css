@@ -1,0 +1,612 @@
+/* ═══════════════════════════════════════════════════════════════
+   FONT IMPORT
+   Cinzel: font serif con maiuscoletto, usato nell'UI ufficiale LoL
+   per titoli e nomi — evoca l'estetica "classica/imperiale" del gioco.
+   Nunito Sans: sans-serif arrotondato, leggibile su schermi piccoli
+   per il corpo del testo e le statistiche.
+   ═══════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Nunito+Sans:wght@400;600&display=swap');
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — CSS CUSTOM PROPERTIES
+   Centralizza tutti i valori di colore, spaziatura e timing.
+   Modificare qui cambia l'intero tema senza cercare valori
+   hardcoded in tutto il file.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* Sfondo — gerarchia scura in 3 livelli:
+     primary (pagina) → secondary (header/footer) → card (contenuti) */
+  --bg-primary:    #0A0E1A;
+  --bg-secondary:  #0F1629;
+  --bg-card:       #111827;
+  --bg-card-hover: #162032;
+
+  /* Bordi — color neutro per struttura, gold per enfasi/focus */
+  --border-color: #1E2D40;
+  --border-gold:  #C8A84B;
+
+  /* Oro — il colore simbolo di LoL (Hextech gold).
+     primary: testo e icone principali
+     light:   hover/enfasi (più brillante)
+     dim:     accenti secondari (più scuro, non abbaglia) */
+  --gold-primary: #C8A84B;
+  --gold-light:   #F0D080;
+  --gold-dim:     #8B6914;
+
+  /* Testo — contrasto calibrato su sfondo scuro */
+  --text-primary:   #E8E0D0;  /* quasi bianco, leggermente caldo */
+  --text-secondary: #7A8FA6;  /* grigio-blu per info secondarie */
+  --text-gold:      #C8A84B;  /* stesso gold, alias semantico */
+
+  /* Stato partite — verde desaturato e rosso morbido:
+     evitano l'eccessivo contrasto che affatica la vista
+     su UI dark con lettura prolungata */
+  --win-color:  #4CAF76;
+  --loss-color: #E05A5A;
+
+  /* Spacing system basato su 4px (multipli interi).
+     Garantisce coerenza visiva senza calcoli manuali. */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-2xl: 48px;
+
+  /* Border radius — progressivo: sm per input, lg per card */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Transizioni — fast per feedback immediato (button/input focus),
+     normal per animazioni di contenuto (card hover) */
+  --transition-fast:   150ms ease;
+  --transition-normal: 300ms ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   1. RESET E BASE
+   box-sizing: border-box garantisce che padding e border
+   siano inclusi nella width dichiarata — evita overflow inattesi.
+   ═══════════════════════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  /* Scroll fluido per eventuali anchor link interni */
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Nunito Sans', system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   2. HEADER
+   --bg-secondary è leggermente più chiaro del body per creare
+   una separazione visiva senza un contrasto troppo netto.
+   Il border-bottom dorato inquadra l'header come "zona nobile"
+   — la stessa tecnica usata dall'UI di LoL per le cornici.
+   ═══════════════════════════════════════════════════════════════ */
+header {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-gold);
+  padding: var(--space-md) var(--space-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+/* Logo: Cinzel enfatizza l'estetica classica/fantasy del gioco.
+   letter-spacing largo aumenta leggibilità su font serif stilizzato.
+   text-shadow crea un bagliore (glow) dorato sottile — non invadente,
+   ma richiama l'effetto Hextech dell'interfaccia ufficiale. */
+.logo {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold-primary);
+  letter-spacing: 0.15em;
+  text-shadow:
+    0 0 12px rgba(200, 168, 75, 0.5),
+    0 0 24px rgba(200, 168, 75, 0.2);
+  white-space: nowrap;
+  /* Rimuove lo stile default di h1 in contesto header */
+  line-height: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   3. FORM DI RICERCA
+   Flex orizzontale con gap uniforme — gli elementi si allineano
+   naturalmente senza bisogno di margin espliciti.
+   ═══════════════════════════════════════════════════════════════ */
+#search-form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Input e Select condividono la stessa base visiva:
+   sfondo card (più scuro del secondary), bordo neutro.
+   La transizione sul border-color crea il feedback visivo al focus
+   senza spostamenti di layout (outline: none evita il contorno
+   del browser che spesso è poco coordinato col tema). */
+#search-form select,
+#search-form input[type="search"] {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: var(--space-sm) var(--space-md);
+  font-family: 'Nunito Sans', system-ui, sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color var(--transition-fast),
+              box-shadow   var(--transition-fast);
+}
+
+/* Focus: il bordo oro + box-shadow glow segnalano chiaramente
+   quale campo è attivo senza alterare le dimensioni dell'elemento
+   (box-shadow non impatta il box model). */
+#search-form select:focus,
+#search-form input[type="search"]:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 0 2px rgba(200, 168, 75, 0.2);
+}
+
+/* Opzioni del select: il colore di sfondo evita il tema chiaro
+   che molti browser applicano di default alle option. */
+#search-form select option {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+/* Larghezza fissa: abbastanza per "NomeGiocatore#TAG" senza
+   espandere eccessivamente il form nell'header. */
+#summoner-input {
+  width: 280px;
+}
+
+/* Rimuove l'icona "x" cancella nativa di Chrome su type="search"
+   — interferirebbe col design personalizzato. */
+#summoner-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+/* Button: sfondo oro con testo scuro — massimo contrasto
+   su background dorato (WCAG AA).
+   translateY al hover crea un micro-sollevamento che comunica
+   interattività senza animazioni elaborate. */
+#search-form button[type="submit"] {
+  background-color: var(--gold-primary);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-lg);
+  font-family: 'Nunito Sans', system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+              transform        var(--transition-fast);
+  white-space: nowrap;
+}
+
+#search-form button[type="submit"]:hover {
+  background-color: var(--gold-light);
+  transform: translateY(-1px);
+}
+
+#search-form button[type="submit"]:active {
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   4. MAIN — contenitore principale
+   max-width: 1200px bilancia leggibilità (le righe non diventano
+   troppo lunghe) e utilizzo dello spazio su monitor wide.
+   ═══════════════════════════════════════════════════════════════ */
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   5. CARD BASE — applicata a tutti gli article nella dashboard
+   Box-shadow al hover crea profondità senza muovere l'elemento
+   (translateY farebbe saltare il layout con molte card).
+   ═══════════════════════════════════════════════════════════════ */
+#summoner-card,
+#rank-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  transition: border-color  var(--transition-normal),
+              box-shadow    var(--transition-normal);
+}
+
+#summoner-card:hover,
+#rank-card:hover {
+  border-color: var(--border-gold);
+  box-shadow: 0 0 20px rgba(200, 168, 75, 0.1);
+}
+
+/* Layout sezione profilo: CSS Grid con auto-fit + minmax.
+   Le card si affiancano se c'è spazio, altrimenti si impilano
+   automaticamente — senza media query esplicite per questo break. */
+#profile-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-lg);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   6. SUMMONER CARD
+   ═══════════════════════════════════════════════════════════════ */
+#summoner-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+/* Icona profilo: border-radius 50% → cerchio.
+   Il bordo oro + glow la fanno risaltare come elemento principale
+   della scheda, coerente con la grafica Hextech di LoL. */
+#summoner-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-primary);
+  box-shadow: 0 0 12px rgba(200, 168, 75, 0.3);
+  object-fit: cover;
+  flex-shrink: 0; /* non si comprime se il nome è lungo */
+}
+
+/* Nome: Cinzel per coerenza con il logo e l'estetica del gioco */
+#summoner-name {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+/* Livello: testo dorato più piccolo, subordinato al nome */
+#summoner-level {
+  font-size: 0.9rem;
+  color: var(--text-gold);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   7. RANK CARD
+   ═══════════════════════════════════════════════════════════════ */
+#rank-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+/* Emblema rank: nascosto di default via JS (hidden attribute),
+   qui impostiamo dimensioni per quando viene mostrato */
+#rank-emblem {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Tier: Cinzel + gold-light (versione brillante) per trasmettere
+   "importanza" — il rank è l'informazione più pregiata nella card */
+#rank-tier {
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--gold-light);
+  margin-bottom: var(--space-xs);
+}
+
+/* LP: testo normale, secondario rispetto al tier */
+#rank-lp {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  margin-bottom: var(--space-xs);
+}
+
+/* Winrate: meno importante, colore muted */
+#rank-winrate {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   8. SEZIONE PARTITE
+   ═══════════════════════════════════════════════════════════════ */
+#matches-section {
+  margin-top: var(--space-xl);
+}
+
+/* Titolo sezione: Cinzel + linea dorata sotto crea una
+   "intestazione decorata" coerente con l'estetica LoL.
+   Il border-bottom sostituisce visivamente un separatore div. */
+#matches-section h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--gold-primary);
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-gold);
+  padding-bottom: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+/* Lista: reset degli stili UL nativi del browser,
+   flex column per impilare verticalmente le card con gap uniforme */
+#matches-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* Rimuove il padding nativo dei <li> */
+#matches-list li {
+  padding: 0;
+}
+
+/* Match card: Grid a 4 aree con nomi espliciti.
+   Le colonne sono proporzionate: il campione è fisso (48px),
+   il risultato e il tempo hanno larghezze auto,
+   le statistiche occupano lo spazio rimanente (1fr). */
+.match-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  display: grid;
+  grid-template-columns: 100px 56px 1fr auto;
+  grid-template-areas: "outcome champion stats time";
+  align-items: center;
+  gap: var(--space-md);
+  transition: background-color var(--transition-fast);
+}
+
+.match-card:hover {
+  background-color: var(--bg-card-hover);
+}
+
+/* Border-left colorato: segnale visivo immediato win/loss
+   senza cambiare la struttura della card.
+   Usato tramite classe aggiunta da JS (.win / .loss). */
+.match-card.win  { border-left: 4px solid var(--win-color); }
+.match-card.loss { border-left: 4px solid var(--loss-color); }
+
+/* Colonna risultato: testo + metadati impilati verticalmente */
+.match-result-col {
+  grid-area: outcome;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Testo VITTORIA/SCONFITTA: grassetto e colore prominente */
+.match-result {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.match-card.win  .match-result { color: var(--win-color); }
+.match-card.loss .match-result { color: var(--loss-color); }
+
+/* Metadati (mode, durata, tempo): dimensioni ridotte, colore muted */
+.match-mode,
+.match-duration,
+.match-time {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Icona campione: cerchio con bordo card-hover per separazione
+   dal background della card */
+.match-champ-icon {
+  grid-area: champion;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-card-hover);
+  object-fit: cover;
+  justify-self: center;
+}
+
+/* Colonna KDA: statistica principale + dettagli secondari */
+.match-kda-col {
+  grid-area: stats;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* KDA numerico: font più grande e bold — il numero più
+   importante nella schermata post-partita */
+.match-kda {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Ratio KDA: colorato dinamicamente da JS con kdaColor() */
+.match-kda-ratio {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* Role e livello campione */
+.match-role {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Statistiche extra (CS, danni, vision): colonna destra,
+   testo allineato a destra per simmetria col layout grid */
+.match-extra {
+  grid-area: time;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   9. LOADING
+   Animazione pulse: opacity 1→0.4→1 crea un battito che comunica
+   "il sistema sta lavorando" senza un'icona spinner.
+   Più leggero (niente DOM extra) e coerente col tema testuale.
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes pulse {
+  0%, 100% { opacity: 1;   }
+  50%       { opacity: 0.4; }
+}
+
+#loading-section {
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--text-secondary);
+}
+
+#loading-section p {
+  display: inline-block;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   10. ERROR SECTION
+   background rgba anziché colore solido: si integra col dark
+   theme senza un blocco rosso troppo aggressivo.
+   ═══════════════════════════════════════════════════════════════ */
+#error-section {
+  background-color: rgba(224, 90, 90, 0.1);
+  border: 1px solid var(--loss-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  color: #FF8A8A;
+  text-align: center;
+  margin-top: var(--space-lg);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   11. FOOTER
+   Speculare all'header: stesso sfondo secondary, bordo neutro
+   (non dorato — il footer è "fine pagina", non un landmark).
+   ═══════════════════════════════════════════════════════════════ */
+footer {
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  padding: var(--space-lg);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-top: var(--space-2xl);
+}
+
+footer small {
+  display: block;
+  margin-top: var(--space-xs);
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   12. RESPONSIVE — max-width: 768px
+   Ottimizza per tablet e mobile senza rompere il layout desktop.
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Header: impila logo e form verticalmente */
+  header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+
+  .logo {
+    text-align: center;
+  }
+
+  /* Form: permette il wrapping degli elementi */
+  #search-form {
+    flex-wrap: wrap;
+  }
+
+  /* Input occupa tutta la riga disponibile */
+  #summoner-input {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  /* Select e button si dividono la riga */
+  #region-select {
+    flex: 1;
+  }
+
+  #search-form button[type="submit"] {
+    flex: 0 0 auto;
+  }
+
+  /* Profilo: colonna singola (grid già gestisce auto-fit,
+     ma forziamo minmax a 100% per essere espliciti) */
+  #profile-section {
+    grid-template-columns: 1fr;
+  }
+
+  /* Match card: griglia semplificata a 2 colonne.
+     Le statistiche extra spariscono per non affollare lo schermo. */
+  .match-card {
+    grid-template-columns: 56px 1fr;
+    grid-template-areas:
+      "champion outcome"
+      "champion stats";
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .match-extra {
+    display: none;
+  }
+
+  .match-champ-icon {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   13. UTILITY
+   ═══════════════════════════════════════════════════════════════ */
+
+/* .hidden: classe aggiunta/rimossa da JS per compatibilità
+   con il vecchio codice che usa classList */
+.hidden {
+  display: none !important;
+}
+
+/* [hidden]: override per assicurarsi che l'attributo nativo
+   HTML5 abbia sempre la precedenza, anche se regole CSS
+   con selettori più specifici cercano di impostare display. */
+[hidden] {
+  display: none !important;
+}

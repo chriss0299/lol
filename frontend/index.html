@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <!-- Codifica caratteri: supporto completo Unicode (accenti, simboli) -->
+  <meta charset="UTF-8" />
+
+  <!-- Viewport: scala corretta su mobile, impedisce zoom automatico iOS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO: descrizione indicizzabile dai motori di ricerca -->
+  <meta name="description" content="Dashboard per visualizzare statistiche League of Legends: profilo summoner, rank e partite recenti." />
+
+  <!-- Open Graph: anteprima quando il link viene condiviso su social -->
+  <meta property="og:title" content="LoL Dashboard" />
+  <meta property="og:description" content="Cerca il tuo summoner e visualizza rank, KDA e partite recenti." />
+  <meta property="og:type" content="website" />
+
+  <title>LoL Dashboard</title>
+
+  <!-- Foglio di stile principale: caricato prima del body per evitare FOUC -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- app.js con defer: eseguito dopo il parsing HTML, non blocca il rendering -->
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+  <!--
+    <header>: landmark semantico — intestazione primaria della pagina.
+    Contiene il brand e il form di ricerca globale, accessibile via
+    screen reader come "banner" region.
+  -->
+  <header>
+
+    <!-- Logo testuale: h1 unico nella pagina, identifica il prodotto -->
+    <h1 class="logo">LoL Dashboard</h1>
+
+    <!--
+      <nav>: landmark semantico per la navigazione.
+      Qui ospita il form di ricerca perché è il punto di ingresso
+      principale dell'applicazione — l'utente "naviga" verso un profilo.
+    -->
+    <nav aria-label="Ricerca summoner">
+
+      <!--
+        <form>: elemento semantico per input utente.
+        data-action="search" → hook per app.js senza dipendere dall'id.
+        novalidate → la validazione è gestita da JS per UX migliore.
+      -->
+      <form id="search-form" data-action="search" novalidate>
+
+        <!--
+          <select>: scelta della region API Riot.
+          data-param="region" → app.js legge il valore tramite dataset.
+          I value corrispondono agli slug ufficiali delle API Riot.
+        -->
+        <select
+          id="region-select"
+          name="region"
+          data-param="region"
+          aria-label="Seleziona region"
+        >
+          <option value="euw1">EUW</option>
+          <option value="na1">NA</option>
+          <option value="eun1">EUNE</option>
+          <option value="kr">KR</option>
+          <option value="br1">BR</option>
+        </select>
+
+        <!--
+          <input type="search">: semanticamente indica una query di ricerca.
+          Mostra la "x" per cancellare il testo su browser supportati.
+          data-param="name" → usato da app.js per costruire la richiesta API.
+          autocomplete="off" → evita suggerimenti del browser su nomi di gioco.
+        -->
+        <input
+          type="search"
+          id="summoner-input"
+          name="summoner"
+          data-param="name"
+          placeholder="Nome#TAG (es. Faker#KR1)"
+          autocomplete="off"
+          spellcheck="false"
+          aria-label="Nome summoner e tag"
+          required
+        />
+
+        <!--
+          <button type="submit">: attiva la ricerca.
+          type="submit" è esplicito per chiarezza e compatibilità form.
+        -->
+        <button type="submit">Cerca</button>
+
+      </form>
+    </nav>
+  </header>
+
+  <!--
+    <main>: landmark semantico — contenuto principale della pagina.
+    Unico per pagina. Screen reader lo espone come "main" region.
+    data-state="idle" → app.js aggiorna lo stato per gestire le sezioni visibili.
+  -->
+  <main data-state="idle">
+
+    <!--
+      SEZIONE PROFILO
+      ================
+      <section>: raggruppamento tematico — tutto ciò che riguarda il profilo.
+      hidden: attributo HTML5 nativo (equivale a display:none).
+             rimosso da JS quando i dati sono pronti.
+      data-section="profile" → selettore generico per app.js.
+      aria-live="polite" → screen reader annuncia le modifiche al contenuto.
+    -->
+    <section id="profile-section" hidden data-section="profile" aria-live="polite">
+
+      <!--
+        <article>: contenuto autonomo e auto-consistente — la "scheda summoner"
+        ha senso anche fuori contesto (potrebbe essere embedded altrove).
+        data-card="summoner" → hook per stili e JS specifici.
+      -->
+      <article id="summoner-card" data-card="summoner">
+
+        <!--
+          Icona profilo: src vuoto di default, popolato da JS con URL DataDragon.
+          data-icon="profile" → app.js identifica l'immagine senza dipendere dall'id.
+          alt vuoto momentaneamente; JS aggiorna alt con il nome summoner.
+        -->
+        <img
+          id="summoner-icon"
+          src=""
+          alt=""
+          data-icon="profile"
+          width="80"
+          height="80"
+        />
+
+        <!-- h2: titolo della sezione summoner — secondo livello gerarchico -->
+        <h2 id="summoner-name" data-field="name"></h2>
+
+        <!-- <p>: paragrafo semantico per il livello account -->
+        <p id="summoner-level" data-field="level"></p>
+
+      </article>
+
+      <!--
+        <article>: scheda rank — autonoma, potrebbe essere riutilizzata
+        per mostrare solo il rank in altri contesti (widget, embed).
+        data-card="rank" e data-queue="solo" → app.js gestisce
+        sia Solo/Duo che Flex con lo stesso template.
+      -->
+      <article id="rank-card" data-card="rank" data-queue="solo">
+
+        <!--
+          Emblema del tier (Iron/Bronze/.../Challenger).
+          src popolato da JS con l'immagine appropriata.
+          data-icon="rank-emblem" → hook per aggiornamento dinamico.
+        -->
+        <img
+          id="rank-emblem"
+          src=""
+          alt=""
+          data-icon="rank-emblem"
+          width="64"
+          height="64"
+        />
+
+        <!-- h3: titolo del rank — terzo livello, sotto la sezione profilo -->
+        <h3 id="rank-tier" data-field="tier"></h3>
+
+        <!-- <p>: League Points — dato numerico semplice -->
+        <p id="rank-lp" data-field="lp"></p>
+
+        <!-- <p>: Winrate calcolato (wins/losses) — dato derivato -->
+        <p id="rank-winrate" data-field="winrate"></p>
+
+      </article>
+
+    </section>
+
+    <!--
+      SEZIONE PARTITE RECENTI
+      ========================
+      <section>: raggruppamento tematico separato dal profilo.
+      Contiene una lista di partite — concettualmente distinto dalla scheda profilo.
+      aria-live="polite" → aggiornamenti annunciati agli screen reader.
+    -->
+    <section id="matches-section" hidden data-section="matches" aria-live="polite">
+
+      <!-- h2: titolo della sezione — allineato gerarchicamente con gli altri h2 -->
+      <h2>Partite Recenti</h2>
+
+      <!--
+        <ul>: lista non ordinata semanticamente corretta per un elenco di partite.
+        Non è una sequenza ordinata per importanza → <ul> è preferibile a <ol>.
+        Ogni <li> sarà un <article> generato da JS.
+        aria-label → accessibilità: descrive lo scopo della lista.
+      -->
+      <ul id="matches-list" aria-label="Lista partite recenti">
+        <!-- Popolata dinamicamente da app.js -->
+      </ul>
+
+    </section>
+
+    <!--
+      SEZIONE CARICAMENTO
+      ====================
+      <section>: semanticamente un "stato" della pagina.
+      role="status" → accessibilità: annuncia il messaggio agli screen reader
+                       senza interrompere l'utente (equivalente a aria-live="polite").
+      hidden: visibile solo durante il fetch dei dati.
+    -->
+    <section id="loading-section" hidden data-section="loading" role="status">
+      <p>Caricamento in corso...</p>
+    </section>
+
+    <!--
+      SEZIONE ERRORE
+      ===============
+      <section>: stato di errore — separato semanticamente dal contenuto.
+      role="alert" → accessibilità: annuncia immediatamente l'errore
+                     (aria-live="assertive" implicito), interrompendo lo screen reader.
+      hidden: visibile solo in caso di errore API o di rete.
+    -->
+    <section id="error-section" hidden data-section="error" role="alert">
+
+      <!--
+        <p>: testo dell'errore — aggiornato da JS con il messaggio specifico.
+        data-field="message" → app.js usa dataset per evitare accoppiamento con id.
+      -->
+      <p id="error-message" data-field="message"></p>
+
+    </section>
+
+  </main>
+
+  <!--
+    <footer>: landmark semantico — informazioni accessorie, legali, credits.
+    Accessibile via screen reader come "contentinfo" region.
+  -->
+  <footer>
+
+    <!-- Attribuzione API: testo visibile richiesto dai ToS di Riot Games -->
+    <p>Powered by Riot Games API</p>
+
+    <!--
+      <small>: semanticamente indica testo accessorio / note legali (fine print).
+      Disclaimer richiesto per applicazioni non ufficiali che usano le API Riot.
+    -->
+    <small>Non affiliato a Riot Games. LoL Dashboard è un progetto indipendente.</small>
+
+  </footer>
+
+</body>
+</html>
